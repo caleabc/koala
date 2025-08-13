@@ -39,7 +39,17 @@ fn verify(id){
   if (record.isFound(id) == true){
     print('ID is valid')
 
-    
+    var transferFee = 8
+    var acceptableFee = 10
+    if (transferFee <= acceptableFee){
+      fn getDiscountCode(code){
+        var codes = {ghbn:true, asww:true, htss:true}
+
+        if (codes.isFound(code) == true){
+          print('Discount code is valid')
+        }
+      }
+    }
   }
 }
 
@@ -79,5 +89,14 @@ for (var i = 0; i < nums.length(); i++){
   print(nums[i] + num1 + num2)
 }
 
-
 */
+
+function main(){
+
+}
+
+main()
+
+let syntax = `
+
+`
