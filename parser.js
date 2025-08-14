@@ -6,12 +6,12 @@ class Parser {
 
     parse() {
         let ast = {
-            type: "Program", // Root node of our AST
+            type: "Program",
             body: []
         };
 
-        // Loop through all tokens and parse statements
-        while (this.peek().type !== "EOF") {
+        // Run through all tokens and parse statements
+        while (this.position < this.tokens.length) {
             ast.body.push(this.parseStatement());
         }
 
@@ -20,7 +20,7 @@ class Parser {
 
     // Determine what type of statement we're dealing with
     parseStatement() {
-        let token = this.peek(); // Look at the current token
+        let token = this.currentToken(); // Look at the current token
 
         if (token.type === "FUNCTION") {
             return this.parseFunctionDeclaration(); // Function definition
@@ -41,14 +41,13 @@ class Parser {
         let name = this.expect("IDENTIFIER").value; // Expect function name like 'calculate'
         this.expect("L_PAREN"); // Expect '('
 
-        // Parse function parameters
+        // Parse function declaration parameters
         let params = [];
         while (this.currentToken().type !== "R_PAREN") { // Iterate then stop if we hit ')'
             params.push(this.expect("IDENTIFIER").value);
 
-            if (this.currentToken().type !== "R_PAREN") {
-                // Handle multiple parameters by advancing the current position 
-                this.expect("COMMA");
+            if (this.currentToken().type === 'COMMA'){
+                this.nextToken()
             }
         }
         this.expect("R_PAREN"); // Expect ')'
@@ -71,11 +70,10 @@ class Parser {
 
     // Variable declaration (e.g., let a = 50;)
     parseVariableDeclaration() {
-        this.expect("LET"); // Expect 'let'
+        this.expect("VAR"); // Expect 'var'
         let name = this.expect("IDENTIFIER").value; // Variable name
         this.expect("EQUAL"); // Expect '='
         let value = this.parseExpression(); // Get the value
-        this.expect("SEMICOLON"); // Expect ';'
 
         return {
             type: "VariableDeclaration",
@@ -109,7 +107,6 @@ class Parser {
     parseReturnStatement() {
         this.expect("RETURN"); // Expect 'return'
         let value = this.parseExpression(); // Parse return value
-        this.expect("SEMICOLON"); // Expect ';'
 
         return {
             type: "ReturnStatement",
@@ -122,11 +119,13 @@ class Parser {
         let name = this.expect("IDENTIFIER").value; // Function name
         this.expect("L_PAREN"); // Expect '('
 
+        // Parse function call arguments
         let args = [];
-        while (this.peek().type !== "R_PAREN") {
-            args.push(this.parseExpression()); // Parse function arguments
-            if (this.peek().type !== "R_PAREN") {
-                this.expect("COMMA"); // Handle multiple arguments
+        while (this.currentToken().type !== "R_PAREN") {
+            args.push(this.parseExpression());
+
+            if (this.currentToken().type === 'COMMA'){
+                this.nextToken()
             }
         }
         this.expect("R_PAREN"); // Expect ')'
@@ -152,11 +151,15 @@ class Parser {
     */
     parseExpression() {
         let left = this.parsePrimary();
-    
+        this.nextToken()
+
         // Check for allowed operators [+ - * / == < >]
-        while (["PLUS", "MINUS", "MULTIPLY", "DIVIDE", "GREATER_THAN", "LESS_THAN"].includes(this.peek().type)) {
-            let operator = this.advance().type;
-            let right = this.parsePrimary();
+        while (["PLUS", "MINUS", "MULTIPLY", "DIVIDE", "GREATER_THAN", "LESS_THAN"].includes(this.currentToken().type)) {
+            let operator = this.currentToken()
+
+            let right = this.parsePrimary()
+            this.nextToken()
+
             left = {
                 type: "BinaryExpression",
                 operator,
@@ -164,15 +167,19 @@ class Parser {
                 right
             };
         }
-    
+
         return left;
     }
 
     parsePrimary() {
-        let token = this.advance(); // Move to next token
-    
+        let token = this.currentToken();
+
         if (token.type === "NUMBER") {
             return { type: "Literal", value: Number(token.value) };
+        }
+
+        if (token.type === "STRING") {
+            return { type: "Literal", value: token.value };
         }
 
         if (token.type === "IDENTIFIER"){
@@ -184,8 +191,11 @@ class Parser {
 
     // Expect a specific token type
     expect(type) {
-        if (this.currentToken().type === type) {
-            return this.advance();
+        let token = this.currentToken()
+
+        if (token.type === type) {
+            this.nextToken()
+            return token
         }
 
         throw new Error(`Expected ${type}, got ${this.peek().type}`);
@@ -197,7 +207,7 @@ class Parser {
     }
 
     // Move to the next token
-    advance() {
+    nextToken() {
         this.position = this.position + 1
         return this.tokens[this.position]
     }
