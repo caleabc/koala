@@ -8,15 +8,15 @@ class Tokenizer {
     tokenize() {
         const tokenPatterns = [
             { type: "FUNCTION", regex: /^fn\b/ },
+            { type: "FOR", regex: /^for\b/ },
             { type: "IF", regex: /^if\b/ },
             { type: "ELSE", regex: /^else\b/ },
             { type: "RETURN", regex: /^return\b/ },
             { type: "VAR", regex: /^var\b/ },
             { type: "LOG", regex: /^log\b/ },
-            { type: "IDENTIFIER", regex: /^[a-zA-Z_]\w*/ },
             { type: "NUMBER", regex: /^\d+/ },
-            { type: "EQUAL", regex: /^=/ },
             { type: "DOUBLE_EQUAL", regex: /^==/ },
+            { type: "EQUAL", regex: /^=/ },
             { type: "NOT_EQUAL", regex: /^!=/ },
             { type: "GREATER_THAN", regex: /^>/ },
             { type: "LESS_THAN", regex: /^</ },
@@ -35,6 +35,7 @@ class Tokenizer {
             { type: "COMMA", regex: /^,/ },
             { type: "STRING", regex: /^'([^']*)'/ },
             { type: "SEMICOLON", regex: /^;/ },
+            { type: "IDENTIFIER", regex: /^[a-zA-Z_]\w*/ },
             { type: "WHITESPACE", regex: /^\s+/, ignore: true }
         ];
 

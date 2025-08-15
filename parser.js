@@ -23,9 +23,11 @@ class Parser {
         let token = this.currentToken(); // Look at the current token
 
         if (token.type === "FUNCTION") {
-            return this.parseFunctionDeclaration(); // Function definition
+            return this.parseFunctionDeclaration(); // Function declaration
         } else if (token.type === "VAR") {
             return this.parseVariableDeclaration(); // Variable declaration
+        } else if (token.type === "FOR"){
+            return this.parseForStatement() // For statement
         } else if (token.type === "IF") {
             return this.parseIfStatement(); // If condition
         } else if (token.type === "RETURN") {
@@ -82,6 +84,58 @@ class Parser {
         };
     }
 
+    // For statement ( eg., for (var i = 0; i < 5; i++){...} )
+    parseForStatement() {
+        // Expect starting 'for' keyword and opening parenthesis
+        this.expect("FOR");
+        this.expect("L_PAREN");
+
+        // --- 1. Parse initializer ---
+        // Example: var i = 0
+        let init = null;
+        if (this.currentToken().type !== "SEMICOLON") {
+            if (this.currentToken().type === "VAR") {
+                init = this.parseVariableDeclaration();
+            } else {
+                init = this.parseExpression();
+            }
+        }
+        this.expect("SEMICOLON");
+
+        // --- 2. Parse condition ---
+        // Example: i < 5
+        let condition = null;
+        if (this.currentToken().type !== "SEMICOLON") {
+            condition = this.parseExpression();
+        }
+        this.expect("SEMICOLON");
+
+        // --- 3. Parse increment ---
+        // Example: i = i + 1
+        let increment = null;
+        if (this.currentToken().type !== "R_PAREN") {
+            increment = this.parseExpression();
+        }
+        this.expect("R_PAREN");
+
+        // --- 4. Parse loop body ---
+        this.expect("L_BRACE");
+        let body = [];
+        while (this.currentToken().type !== "R_BRACE") {
+            body.push(this.parseStatement());
+        }
+        this.expect("R_BRACE");
+
+        // --- 5. Return AST node ---
+        return {
+            type: "ForStatement",
+            init: init,
+            condition: condition,
+            increment: increment,
+            body: body
+        };
+    }
+
     // If statement (e.g., if (a > 1) { ... } else { ... })
     parseIfStatement() {
         this.expect("IF"); // Expect 'if'
@@ -90,8 +144,9 @@ class Parser {
         this.expect("R_PAREN"); // Expect ')'
         this.expect("L_BRACE"); // Expect '{'
 
+        // Parse if statement body
         let body = [];
-        while (this.peek().type !== "R_BRACE") {
+        while (this.currentToken().type !== "R_BRACE") {
             body.push(this.parseStatement());
         }
         this.expect("R_BRACE"); // Expect '}'
@@ -154,8 +209,9 @@ class Parser {
         this.nextToken()
 
         // Check for allowed operators [+ - * / == < >]
-        while (["PLUS", "MINUS", "MULTIPLY", "DIVIDE", "GREATER_THAN", "LESS_THAN"].includes(this.currentToken().type)) {
+        while (["PLUS", "MINUS", "MULTIPLY", "DIVIDE", "GREATER_THAN", "LESS_THAN", "DOUBLE_EQUAL"].includes(this.currentToken().type)) {
             let operator = this.currentToken()
+            this.nextToken()
 
             let right = this.parsePrimary()
             this.nextToken()
