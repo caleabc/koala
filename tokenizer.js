@@ -36,7 +36,7 @@ class Tokenizer {
             { type: "STRING", regex: /^'([^']*)'/ },
             { type: "SEMICOLON", regex: /^;/ },
             { type: "IDENTIFIER", regex: /^[a-zA-Z_]\w*/ },
-            { type: "WHITESPACE", regex: /^\s+/, ignore: true }
+            { type: "WHITESPACE", regex: /^\s+/ }
         ];
 
         let position = this.position

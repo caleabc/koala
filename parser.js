@@ -33,11 +33,18 @@ class Parser {
         } else if (token.type === "RETURN") {
             return this.parseReturnStatement(); // Return statement
         } else if (token.type === "IDENTIFIER") {
-            return this.parseFunctionCall(); // Function call
+            let advance = this.tokens[this.position + 1]
+
+            if (advance.type === "L_PAREN"){
+                return this.parseFunctionCall(); // Function call
+            } else {
+                return this.parseVariableDeclaration(); // Variable declaration
+            }
         }
     }
 
-    // Function declaration (e.g., fn calculate(x, y) { ... })
+    // Parse function declaration
+    // fn calculate(x, y) { ... }
     parseFunctionDeclaration() {
         this.expect("FUNCTION"); // Expect 'fn'
         let name = this.expect("IDENTIFIER").value; // Expect function name like 'calculate'
@@ -70,9 +77,17 @@ class Parser {
         };
     }
 
-    // Variable declaration (e.g., let a = 50;)
+    // Parse variable declaration
+    // var a = 50
     parseVariableDeclaration() {
-        this.expect("VAR"); // Expect 'var'
+
+        // Variable can be initialize as:
+        // var transferFee = 10
+        // transferFee = 10
+
+        if (this.currentToken().type === 'VAR'){
+            this.expect("VAR"); // Expect 'var'
+        }
         let name = this.expect("IDENTIFIER").value; // Variable name
         this.expect("EQUAL"); // Expect '='
         let value = this.parseExpression(); // Get the value
@@ -84,13 +99,13 @@ class Parser {
         };
     }
 
-    // For statement ( eg., for (var i = 0; i < 5; i++){...} )
+    // Parse for statement
+    // for (var i = 0; i < 5; i=i+1){...}
     parseForStatement() {
-        // Expect starting 'for' keyword and opening parenthesis
-        this.expect("FOR");
-        this.expect("L_PAREN");
+        this.expect("FOR"); // Expect 'for'
+        this.expect("L_PAREN"); // Expect '('
 
-        // --- 1. Parse initializer ---
+        // 1. Parse initializer
         // Example: var i = 0
         let init = null;
         if (this.currentToken().type !== "SEMICOLON") {
@@ -102,7 +117,7 @@ class Parser {
         }
         this.expect("SEMICOLON");
 
-        // --- 2. Parse condition ---
+        // 2. Parse condition
         // Example: i < 5
         let condition = null;
         if (this.currentToken().type !== "SEMICOLON") {
@@ -110,23 +125,26 @@ class Parser {
         }
         this.expect("SEMICOLON");
 
-        // --- 3. Parse increment ---
+        // 3. Parse increment
         // Example: i = i + 1
+        this.expect("IDENTIFIER")
+        this.expect("EQUAL")
+
         let increment = null;
         if (this.currentToken().type !== "R_PAREN") {
             increment = this.parseExpression();
         }
-        this.expect("R_PAREN");
+        this.expect("R_PAREN"); // Expect ')'
+        this.expect("L_BRACE"); // Expect '{'
 
-        // --- 4. Parse loop body ---
-        this.expect("L_BRACE");
+        // 4. Parse loop body
         let body = [];
         while (this.currentToken().type !== "R_BRACE") {
             body.push(this.parseStatement());
         }
-        this.expect("R_BRACE");
+        this.expect("R_BRACE"); // Expect '}'
 
-        // --- 5. Return AST node ---
+        // 5. Return AST node
         return {
             type: "ForStatement",
             init: init,
@@ -136,7 +154,8 @@ class Parser {
         };
     }
 
-    // If statement (e.g., if (a > 1) { ... } else { ... })
+    // Parse if statement
+    // if (a > 1) { ... } else { ... }
     parseIfStatement() {
         this.expect("IF"); // Expect 'if'
         this.expect("L_PAREN"); // Expect '('
@@ -158,7 +177,10 @@ class Parser {
         };
     }
 
-    // Return statement (e.g., return x + y;)
+    // Parse return statement
+    // return 5
+    // return x
+    // return x + y
     parseReturnStatement() {
         this.expect("RETURN"); // Expect 'return'
         let value = this.parseExpression(); // Parse return value
@@ -169,7 +191,8 @@ class Parser {
         };
     }
 
-    // Function call (e.g., calc(4, 8);)
+    // Function call
+    // calc(4, 8)
     parseFunctionCall() {
         let name = this.expect("IDENTIFIER").value; // Function name
         this.expect("L_PAREN"); // Expect '('
@@ -184,7 +207,6 @@ class Parser {
             }
         }
         this.expect("R_PAREN"); // Expect ')'
-        this.expect("SEMICOLON"); // Expect ';'
 
         return {
             type: "FunctionCall",
@@ -260,6 +282,12 @@ class Parser {
     // Get token
     currentToken() {
         return this.tokens[this.position];
+    }
+
+    // Go back to previous token
+    prevToken() {
+        this.position = this.position - 1
+        return this.tokens[this.position]
     }
 
     // Move to the next token
