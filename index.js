@@ -1,83 +1,53 @@
+const Tokenizer = require('./tokenizer')
+const Parser = require('./parser')
+// const Interpreter = requie('./interpreter')
+
+const code = `
+fn calculate(a, b, c){
+
+  var output = 0
+
+  for (var i = 0; i < 30; i=i+1){
+    output = output + i
+  }
+
+
+}
+calculate(5, 2, 7)
+`
+
+const tokens = new Tokenizer(code).tokenize();
+console.log('tokensss', tokens)
+
+const ast = new Parser(tokens).parse();
+
+console.log('ast yhnn', JSON.stringify(ast, null, 2));
+
+// const output = new Interpreter(ast).run();
+
+// console.log(output)
+
+
 /*
 
-koala - A programming language engine
+const code = `
+fn calculate(a, b, c){
+  var transferFee = 10
 
-.
-.
-.
+  var a = 4 + 5
 
-How to create a variable
-------------------------
-var age = 5
-var name = 'Ben'
-
-How to create an array
-----------------------
-var nums = [2,5,1,1,9]
-var cities = ['Cebu', 'Davao', 'Batangas']
-
-How to create an object or dictionary
--------------------------------------
-var price = {milk:10, bread:20, cookies:8, coffee:7, pancake: 14}
-var capitalCity = {philippines:'Manila', amerika:'Washington DC', japan:'Tokyo'}
-
-How to create a function
-------------------------
-fn calculate(a, b){
-  var serviceFee = 53
-
-  return a + b + serviceFee
-}
-
-fn greet(name){
-  return 'Hello ' + name + '!'
-}
-
-fn verify(id){
-  var record = {azxc:true, hgbn:true, mntt:true}
-
-  if (record.isFound(id) == true){
-    print('ID is valid')
-
-    
+  if (a + b + c + a == 20){
+    var e = 22
   }
+
+  var output = 0
+
+  for (var i = 0; i < 30; i=i+1){
+    output = output + i
+  }
+
 }
-
-Conditional
------------
-var num1 = 4
-var num2 = 20
-var target = 40
-
-if (num1 < num2){
-  print('num1 has a smaller value')
-} else {
-  print('num1 has a larger value')
-}
-
-if (num1 < num2){
-  print('num1 has a smaller value')
-}
-
-if (num1 + num2 == target){
-  print('Yayyy, you guess the target number')
-}
-
-if (num1 + num2 == target && target / 2 == num1 + num1){
-  print('Yayyy, you guess the target number')
-}
-
-Loop
-----
-var nums = [2,1,55,4,9]
-for (var i = 0; i < nums.length(); i++){
-  print(nums[i])
-
-  var num1 = 100
-  var num2 = 200
-
-  print(nums[i] + num1 + num2)
-}
-
+calculate(5, 2, 7);
+`
 
 */
