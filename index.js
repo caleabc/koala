@@ -5,43 +5,53 @@ const Interpreter = require('./interpreter')
 const code = `
 var heyvar = 554
 
+fn verify(id){
+  var vv = 12
+  return vv
+}
+
+fn getLocation(){
+  var myLocation = 'Davao City'
+  return myLocation
+}
+
 fn calculate(a, b){
   var num = 77
-  return num + a + b
+
+  fn calc2(){
+    var price = 100
+    return price + num
+  }
+  calc2()
+
+  return num + a + b + heyvar
 }
+
 calculate(5, 2)
 `
 
 const tokens = new Tokenizer(code).tokenize();
 const ast = new Parser(tokens).parse();
-
 // console.log('ast yhnn', JSON.stringify(ast, null, 2));
 
-const output = new Interpreter(ast).run();
-
-// console.log(output)
+const output = new Interpreter().run(ast);
 
 
 /*
 
-const code = `
-fn calculate(a, b, c){
-  var transferFee = 10
+heyvar = heyvar + a
 
-  var a = 4 + 5
-
-  if (a + b + c + a == 20){
-    var e = 22
-  }
-
-  var output = 0
-
-  for (var i = 0; i < 30; i=i+1){
-    output = output + i
-  }
-
+fn payment(currency, quantity){
+  var cu = 15
+  return cu
 }
-calculate(5, 2, 7);
-`
+
+fn calc2(){
+    var price = 100
+    return price + num
+  }
+  calc2()
 
 */
+
+

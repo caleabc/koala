@@ -276,7 +276,7 @@ class Parser {
             return token
         }
 
-        throw new Error(`Expected ${type}, got ${this.peek().type}`);
+        throw new Error(`Expected ${type}, got ${token.type}`);
     }
 
     // Get token

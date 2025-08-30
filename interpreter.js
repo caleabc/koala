@@ -1,21 +1,20 @@
 class Interpreter {
     constructor(ast) {
-        this.ast = ast;
-        this.globalScope = {}; // Stores function definitions
+        this.globalScope = {}
     }
 
-    run() {
+    run(ast) {
         let aaaa = 55
-        return this.evaluate(this.ast);
+        return this.evaluate(ast, this.globalScope)
     }
 
-    evaluate(node, scope = {}) {        
+    evaluate(node, scope) {
         switch (node.type) {
             case "Program":
                 return this.evaluateBlock(node.body, scope);
 
             case "FunctionDeclaration":
-                this.globalScope[node.name] = node; // Store function
+                scope[node.name] = node;
                 return null;
 
             case "FunctionCall":
@@ -52,6 +51,7 @@ class Interpreter {
                 } else if (this.globalScope[node.name] !== undefined) {
                     return this.globalScope[node.name];
                 }
+
                 throw new Error(`Undefined variable: ${node.name}`);
 
             default:
@@ -85,20 +85,20 @@ class Interpreter {
     }
 
     executeFunction(node, scope) {
-        let func = this.globalScope[node.name];
-        if (!func) throw new Error(`Function not found: ${node.name}`);
+        let currentFunction = scope[node.name];
+        if (currentFunction === undefined) throw new Error(`Function not found: ${node.name}`);
 
-        let newScope = { ...this.globalScope }; // New scope for function execution
+        let newScope = { ...scope };
 
         // Map function parameters to their arguments
-        func.params.forEach((param, index) => {
+        currentFunction.params.forEach((param, index) => {
             newScope[param] = this.evaluate(node.arguments[index], scope);
         });
 
-        return this.evaluateBlock(func.body, newScope);
+        return this.evaluateBlock(currentFunction.body, newScope);
     }
 }
 
-module.exports = Interpreter
+module.exports = Interpreter;
 
 
