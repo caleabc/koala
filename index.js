@@ -10,24 +10,10 @@ fn verify(id){
   return vv
 }
 
-fn getLocation(){
-  var myLocation = 'Davao City'
-  return myLocation
+fn getTotal(){
+  return heyvar + 1
 }
-
-fn calculate(a, b){
-  var num = 77
-
-  fn calc2(){
-    var price = 100
-    return price + num
-  }
-  calc2()
-
-  return num + a + b + heyvar
-}
-
-calculate(5, 2)
+var r = getTotal()
 `
 
 const tokens = new Tokenizer(code).tokenize();
@@ -38,6 +24,42 @@ const output = new Interpreter().run(ast);
 
 
 /*
+var heyvar = 554
+
+fn verify(id){
+  var vv = 12
+  return vv
+}
+
+fn getLocation(){
+  var myLocation = 'Davao City'
+  return myLocation
+}
+
+fn calculate(a, b){
+  var num = 77
+
+  fn calc2(){
+    var price = 100
+    var num = 1
+    return price + num
+  }
+  calc2()
+
+  return num + a + b + heyvar
+}
+calculate(5, 2)
+
+fn getTotal(){
+  return heyvar + num
+}
+var r = getTotal()
+
+
+
+
+
+
 
 heyvar = heyvar + a
 

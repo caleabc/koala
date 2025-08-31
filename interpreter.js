@@ -48,8 +48,6 @@ class Interpreter {
             case "Identifier":
                 if (scope[node.name] !== undefined) {
                     return scope[node.name];
-                } else if (this.globalScope[node.name] !== undefined) {
-                    return this.globalScope[node.name];
                 }
 
                 throw new Error(`Undefined variable: ${node.name}`);

@@ -230,6 +230,10 @@ class Parser {
         let left = this.parsePrimary();
         this.nextToken()
 
+        if (this.position >= this.tokens.length) {
+            return left;
+        }
+
         // Check for allowed operators [+ - * / == < >]
         while (["PLUS", "MINUS", "MULTIPLY", "DIVIDE", "GREATER_THAN", "LESS_THAN", "DOUBLE_EQUAL"].includes(this.currentToken().type)) {
             let operator = this.currentToken()
@@ -261,9 +265,21 @@ class Parser {
         }
 
         if (token.type === "IDENTIFIER"){
-            return { type: "Identifier", name: token.value };
+            let position = this.position
+
+            let advance = null
+            if (position + 1 < this.tokens.length){
+                advance = this.tokens[this.position + 1]
+            }
+
+            if (advance !== null && advance.type === "L_PAREN"){
+                return this.parseFunctionCall();
+            } else {
+                return { type: "Identifier", name: token.value };
+            }
+
         }
-    
+
         throw new Error(`Unexpected token in expression: ${token.value}`);
     }
 
