@@ -42,6 +42,9 @@ class Interpreter {
             case "ReturnStatement":
                 return this.evaluate(node.value, scope);
 
+            case "LogStatement":
+                return this.log(node, scope);
+
             case "Literal":
                 return node.value;
 
@@ -90,10 +93,21 @@ class Interpreter {
 
         // Map function parameters to their arguments
         currentFunction.params.forEach((param, index) => {
-            newScope[param] = this.evaluate(node.arguments[index], scope);
+
+            if (node.arguments[index] === undefined){
+                newScope[param] = undefined
+            } else {
+                newScope[param] = this.evaluate(node.arguments[index], scope);
+            }
+
         });
 
         return this.evaluateBlock(currentFunction.body, newScope);
+    }
+
+    log(node, scope){
+        console.log(this.evaluate(node.expression, scope))
+        return null
     }
 }
 

@@ -33,7 +33,7 @@ class Tokenizer {
             { type: "L_BRACE", regex: /^\{/ },
             { type: "R_BRACE", regex: /^\}/ },
             { type: "COMMA", regex: /^,/ },
-            { type: "STRING", regex: /^'([^']*)'/ },
+            { type: "STRING", regex: /^(['"])(.*?)\1/ },
             { type: "SEMICOLON", regex: /^;/ },
             { type: "IDENTIFIER", regex: /^[a-zA-Z_]\w*/ },
             { type: "WHITESPACE", regex: /^\s+/ }

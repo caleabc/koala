@@ -40,6 +40,8 @@ class Parser {
             } else {
                 return this.parseVariableDeclaration(); // Variable declaration
             }
+        } else if (token.type === "LOG"){
+            return this.parseLogStatement()
         }
     }
 
@@ -228,9 +230,8 @@ class Parser {
     */
     parseExpression() {
         let left = this.parsePrimary();
-        this.nextToken()
 
-        if (this.position >= this.tokens.length) {
+        if (this.position === this.tokens.length) {
             return left;
         }
 
@@ -240,7 +241,6 @@ class Parser {
             this.nextToken()
 
             let right = this.parsePrimary()
-            this.nextToken()
 
             left = {
                 type: "BinaryExpression",
@@ -257,10 +257,12 @@ class Parser {
         let token = this.currentToken();
 
         if (token.type === "NUMBER") {
+            this.nextToken()
             return { type: "Literal", value: Number(token.value) };
         }
 
         if (token.type === "STRING") {
+            this.nextToken()
             return { type: "Literal", value: token.value };
         }
 
@@ -275,12 +277,25 @@ class Parser {
             if (advance !== null && advance.type === "L_PAREN"){
                 return this.parseFunctionCall();
             } else {
+                this.nextToken()
                 return { type: "Identifier", name: token.value };
             }
 
         }
 
         throw new Error(`Unexpected token in expression: ${token.value}`);
+    }
+
+    parseLogStatement() {
+        this.expect("LOG");
+        this.expect("L_PAREN");
+        let expression = this.parseExpression();
+        this.expect("R_PAREN");
+
+        return {
+            type: "LogStatement",
+            expression: expression
+        };
     }
 
     // Expect a specific token type
