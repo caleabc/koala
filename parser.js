@@ -5,17 +5,17 @@ class Parser {
     }
 
     parse() {
-        let ast = {
+        let tree = {
             type: "Program",
             body: []
         };
 
         // Run through all tokens and parse statements
         while (this.position < this.tokens.length) {
-            ast.body.push(this.parseStatement());
+            tree.body.push(this.parseStatement());
         }
 
-        return ast;
+        return tree;
     }
 
     // Determine what type of statement we're dealing with
@@ -38,7 +38,7 @@ class Parser {
             if (advance.type === "L_PAREN"){
                 return this.parseFunctionCall(); // Function call
             } else {
-                return this.parseVariableDeclaration(); // Variable declaration
+                return this.parseUpdateVariable();
             }
         } else if (token.type === "LOG"){
             return this.parseLogStatement()
@@ -79,23 +79,36 @@ class Parser {
         };
     }
 
-    // Parse variable declaration
-    // var a = 50
     parseVariableDeclaration() {
 
         // Variable can be initialize as:
         // var transferFee = 10
-        // transferFee = 10
+        // var transferFee = 10 + 5
+        // var transferFee = 10 + baseFee
+        // var transferFee = calculateTransferFee()
 
-        if (this.currentToken().type === 'VAR'){
-            this.expect("VAR"); // Expect 'var'
-        }
+        this.expect("VAR"); // Expect 'var'
         let name = this.expect("IDENTIFIER").value; // Variable name
         this.expect("EQUAL"); // Expect '='
         let value = this.parseExpression(); // Get the value
 
         return {
             type: "VariableDeclaration",
+            name,
+            value
+        };
+    }
+
+    parseUpdateVariable() {
+
+        // transferFee = 10
+
+        let name = this.expect("IDENTIFIER").value; // Variable name
+        this.expect("EQUAL"); // Expect '='
+        let value = this.parseExpression(); // Get the value
+
+        return {
+            type: "UpdateVariable",
             name,
             value
         };
@@ -289,12 +302,25 @@ class Parser {
     parseLogStatement() {
         this.expect("LOG");
         this.expect("L_PAREN");
-        let expression = this.parseExpression();
+
+        // Parse arguments
+        // log("str", str, 1, calc())
+        //      ---   ---  -  ------
+        // those in underline are arguments
+        let args = [];
+        while (this.currentToken().type !== "R_PAREN") {
+            args.push(this.parseExpression());
+
+            if (this.currentToken().type === 'COMMA'){
+                this.nextToken()
+            }
+        }
+
         this.expect("R_PAREN");
 
         return {
             type: "LogStatement",
-            expression: expression
+            args: args
         };
     }
 

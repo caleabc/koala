@@ -1,11 +1,14 @@
 class Interpreter {
-    constructor(ast) {
-        this.globalScope = {}
+
+    constructor(tree){
+        this.tree = tree
+        this.scopes = []
     }
 
-    run(ast) {
-        let aaaa = 55
-        return this.evaluate(ast, this.globalScope)
+    run() {
+        debugger
+
+        return this.evaluate(this.tree, {})
     }
 
     evaluate(node, scope) {
@@ -27,8 +30,11 @@ class Interpreter {
                 return this.evaluateBlock(node.body, { ...scope });
 
             case "VariableDeclaration":
-                scope[node.name] = this.evaluate(node.value, scope);
+                this.evaluateVariableDeclaration(node, scope)
                 return null;
+
+            case "UpdateVariable":
+                return this.evaluateUpdateVariable(node, scope)
 
             case "BinaryExpression":
                 return this.evaluateBinaryExpression(node, scope);
@@ -53,7 +59,7 @@ class Interpreter {
                     return scope[node.name];
                 }
 
-                throw new Error(`Undefined variable: ${node.name}`);
+                throw new Error(`${node.name} is not declared or defined`);
 
             default:
                 throw new Error(`Unknown node type: ${node.type}`);
@@ -64,7 +70,11 @@ class Interpreter {
         for (let stmt of statements) {
             
             let result = this.evaluate(stmt, scope);
-            if (stmt.type === "ReturnStatement") return result; // Stop execution on return
+            if (stmt.type === "ReturnStatement"){
+                this.scopes.pop()
+
+                return result
+            }
         }
         return null;
     }
@@ -89,6 +99,9 @@ class Interpreter {
         let currentFunction = scope[node.name];
         if (currentFunction === undefined) throw new Error(`Function not found: ${node.name}`);
 
+        // The reason why pushing directly to scopes 'push(scope)' and not 'push({...scope})' is because we need to update the real scope at that given time, this is a mutation since it has a same ref id
+        this.scopes.push(scope)
+
         let newScope = { ...scope };
 
         // Map function parameters to their arguments
@@ -105,8 +118,46 @@ class Interpreter {
         return this.evaluateBlock(currentFunction.body, newScope);
     }
 
+    evaluateVariableDeclaration(node, scope){
+
+        if (scope[node.name] === undefined){
+            scope[node.name] = this.evaluate(node.value, scope);
+        } else {
+            throw new Error(`'${node.name}' has already been declared`);
+        }
+
+    }
+
+    evaluateUpdateVariable(node, scope){
+
+        if (scope[node.name] === undefined){
+            throw new Error(`'${node.name}' is not declared or defined so update operation is invalid`);
+        }
+
+        let val = this.evaluate(node.value, scope);
+
+        scope[node.name] = val
+
+        let scopes = this.scopes
+        for (let i = scopes.length-1; i>=0; i--){
+
+            if (scopes[i][node.name] === undefined){
+                break
+            }
+            
+            scopes[i][node.name] = val
+        }
+    }
+
     log(node, scope){
-        console.log(this.evaluate(node.expression, scope))
+
+        let output = ""
+        for (let arg of node.args){
+            output = output + " " + this.evaluate(arg, scope)
+        }
+
+        console.log(output)
+        
         return null
     }
 }

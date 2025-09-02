@@ -1,5 +1,8 @@
-let tests = [
-    `var a = 5`, `var a = "hey"`, `var a = num`, `var a = calculate(2, 5)`
-]
+var t1 = `
+var a = 5
+`
 
+var t2 = `
+var a = "hey"
+`
 
