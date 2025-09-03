@@ -67,15 +67,23 @@ class Interpreter {
     }
 
     evaluateBlock(statements, scope) {
+        
+        // ...
+        let newScope = {...scope}
+
+        this.scopes.push(newScope)
+        
         for (let stmt of statements) {
-            
-            let result = this.evaluate(stmt, scope);
+            let result = this.evaluate(stmt, newScope);
             if (stmt.type === "ReturnStatement"){
                 this.scopes.pop()
 
                 return result
             }
         }
+
+        this.scopes.pop()
+
         return null;
     }
 
@@ -99,10 +107,11 @@ class Interpreter {
         let currentFunction = scope[node.name];
         if (currentFunction === undefined) throw new Error(`Function not found: ${node.name}`);
 
-        // The reason why pushing directly to scopes 'push(scope)' and not 'push({...scope})' is because we need to update the real scope at that given time, this is a mutation since it has a same ref id
-        this.scopes.push(scope)
-
         let newScope = { ...scope };
+
+        // The reason why pushing directly to scopes 'push(scope)' and not 'push({...scope})' is because we need to update the real scope at that given time, this is a mutation since it has a same ref id
+        // Why is it here? i mean below newScope? The reason for that is...
+        this.scopes.push(newScope)
 
         // Map function parameters to their arguments
         currentFunction.params.forEach((param, index) => {
@@ -136,7 +145,7 @@ class Interpreter {
 
         let val = this.evaluate(node.value, scope);
 
-        scope[node.name] = val
+        // scope[node.name] = val
 
         let scopes = this.scopes
         for (let i = scopes.length-1; i>=0; i--){
