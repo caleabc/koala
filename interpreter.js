@@ -170,9 +170,12 @@ class Interpreter {
         while (this.evaluate(node.condition, scope)){
             this.evaluateBlock(node.body, scope)
 
-            // The 'increment' is treated as 'updateVariable', means update the 'init'
+            // This is for 'increment', the 'increment' is treated as 'updateVariable', means update the 'init'
             this.evaluate(node.increment, scope)
         }
+        
+        // Since we declared 'init' to scope we must remove it after the for loop ends because by design var is block-scoped
+        delete scope[node.init.name]
         
     }
 

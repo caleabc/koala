@@ -15,6 +15,8 @@ fn calc11(){
     }
   }
 
+  log("i kjhgg", i)
+
   if (1 < 2){
     var digit = 51
     log("digit is 51", digit)
