@@ -39,6 +39,9 @@ class Interpreter {
             case "BinaryExpression":
                 return this.evaluateBinaryExpression(node, scope);
 
+            case "ForStatement":
+                this.evaluateForStatement(node, scope);
+
             case "IfStatement":
                 if (this.evaluate(node.condition, scope)) {
                     return this.evaluateBlock(node.body, scope);
@@ -156,6 +159,21 @@ class Interpreter {
             
             scopes[i][node.name] = val
         }
+    }
+
+    evaluateForStatement(node, scope){
+        console.log("hello node dfdf", node)
+
+        // This is for 'init'
+        this.evaluate(node.init, scope)
+
+        while (this.evaluate(node.condition, scope)){
+            this.evaluateBlock(node.body, scope)
+
+            // The 'increment' is treated as 'updateVariable', means update the 'init'
+            this.evaluate(node.increment, scope)
+        }
+        
     }
 
     log(node, scope){

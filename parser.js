@@ -142,13 +142,17 @@ class Parser {
 
         // 3. Parse increment
         // Example: i = i + 1
-        this.expect("IDENTIFIER")
-        this.expect("EQUAL")
+        // 'increment' is treated as updateVariable, update the 'init'
 
-        let increment = null;
-        if (this.currentToken().type !== "R_PAREN") {
-            increment = this.parseExpression();
-        }
+        let increment = this.parseUpdateVariable();
+        // this.expect("IDENTIFIER")
+        // this.expect("EQUAL")
+
+        // let increment = null;
+        // if (this.currentToken().type !== "R_PAREN") {
+        //     increment = this.parseExpression();
+        // }
+        
         this.expect("R_PAREN"); // Expect ')'
         this.expect("L_BRACE"); // Expect '{'
 
