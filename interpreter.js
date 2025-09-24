@@ -7,6 +7,7 @@ class Interpreter {
         this.scopeStates = [false]
         this.isNewScopeInserted = true
         this.currentBlockTypes = []
+        this.trackedNodes = [] // purpose of this is for updating variables in the correct scope to be specific in the earliest scope where the variable is declared from the time it encountered update operation basically going backwards direction
     }
 
     run() {
@@ -21,6 +22,8 @@ class Interpreter {
                 this.currentBlockType = "program"
                 this.isNewScopeInserted = true
                 this.scopes.push(scope)
+
+                this.trackedNodes.push({})
                 
                 return this.evaluateBlock(node.body, scope);
 
@@ -87,6 +90,8 @@ class Interpreter {
             newScope = {...scope}
 
             this.scopes.push(newScope)
+
+            this.trackedNodes.push({})
         }
 
         // The purpose of having '__record' is to track variables and prevent redeclaration in the same scope
@@ -101,6 +106,8 @@ class Interpreter {
                 this.scopes.pop()
                 this.scopeStates.pop()
 
+                this.trackedNodes.pop()
+
                 return result
             }
         }
@@ -114,6 +121,8 @@ class Interpreter {
 
         this.scopes.pop()
         this.scopeStates.pop()
+
+        this.trackedNodes.pop()
 
         return null;
     }
@@ -144,6 +153,8 @@ class Interpreter {
         // This scope contains parent scope 
         let newScope = {...scope}
         this.scopes.push(newScope)
+
+        this.trackedNodes.push({})
 
         let currentFunction = newScope[node.name];
         if (currentFunction === undefined) throw new Error(`Function not found: ${node.name}`);
@@ -178,6 +189,9 @@ class Interpreter {
         if (scope[node.name] === undefined || lastState === true){
             scope[node.name] = this.evaluate(node.value, scope);
             scope['__record'][node.name] = true
+
+            let lastNode = this.trackedNodes[this.trackedNodes.length - 1]
+            lastNode[node.name] = node
         } else {
             throw new Error(`'${node.name}' has already been declared`);
         }
@@ -202,6 +216,14 @@ class Interpreter {
             }
             
             scopes[i][node.name] = val
+
+            // Update operation must be stop at the earliest scope where the variable is declared and not the entire variable declaration
+            let tnode = this.trackedNodes[i][node.name]
+            if (tnode !== undefined){
+                if (tnode.name === node.name && tnode.type === "VariableDeclaration"){
+                    break
+                }
+            }
         }
     }
 
@@ -214,6 +236,8 @@ class Interpreter {
         // This scope contains parent scope 
         let newScope = {...scope}
         this.scopes.push(newScope)
+
+        this.trackedNodes.push({})
 
         // This is for 'init'
         this.evaluate(node.init, newScope)
@@ -234,6 +258,8 @@ class Interpreter {
         
         this.scopes.pop()
         this.scopeStates.pop()
+
+        this.trackedNodes.pop()
         
         // Since we declared 'init' to scope we must remove it after the for loop ends because by design var is block-scoped
         // delete scope[node.init.name]
