@@ -1,21 +1,64 @@
 let t1 = `
-var a = 5
+var num = 5
+var name = "ben"
+var total = 22 + 3 - 2 + 6 - 4
 `
 
 let t2 = `
-var a = "hey"
+if (2 < 5){
+  log("2 is less than 5")
+
+  var num = 5
+  log("num is 5", num)
+}
 `
 
 let t3 = `
-var a = true
+fn calc(){
+  return 400
+}
+
+var total = 5 + calc()
+log("total is 405", total)
 `
 
 let t4 = `
-var a = false
+fn calc(){
+  for (var i = 0; i < 10; i = i + 1){
+    if (1 < 2){
+      var digit = 12345
+      log("digit is 12345", digit)
+    }
+  }
+
+  for (var i = 0; i < 10; i = i + 1){
+    var digit = 12345
+    log("digit is 12345", digit)
+  }
+}
+calc()
 `
 
 let t5 = `
-var a = 5 + 3 + 2 - 4 + 4
+var num = 5
+
+fn calc(){
+    log("num is 5", num)
+
+    var num = 8
+    log("num is 8", num)
+
+    if (1 < 2){
+        var num = 10
+        log("num is 10", num)
+    }
+
+    num = 20
+    log("num is 20", num)
+}
+calc()
+
+log("num is 5", num)
 `
 
 let t6 = `
@@ -151,3 +194,17 @@ fn verify(){
 }
 verify()
 `
+
+let testCases = [t1, t2, t3, t4, t5, t6, t7, t8, t9]
+
+const Tokenizer = require('./tokenizer')
+const Parser = require('./parser')
+const Interpreter = require('./interpreter')
+
+for (let i=0; i<testCases.length; i++){
+  const tokens = new Tokenizer(testCases[i]).tokenize();
+  const tree = new Parser(tokens).parse();
+  const output = new Interpreter(tree).run();
+}
+
+

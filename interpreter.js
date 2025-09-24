@@ -89,12 +89,16 @@ class Interpreter {
             // This scope contains parent scope 
             newScope = {...scope}
 
+            // The purpose of having '__record' is to track variables and prevent redeclaration in the same scope
+            newScope['__record'] = {}
+
             this.scopes.push(newScope)
 
             this.trackedNodes.push({})
         }
 
         // The purpose of having '__record' is to track variables and prevent redeclaration in the same scope
+        // redeclare '__record' to make sure it is always empty object everytime a new block is encountered
         newScope['__record'] = {}
         
         this.isNewScopeInserted = false
@@ -152,6 +156,10 @@ class Interpreter {
         this.scopeStates.push(true)
         // This scope contains parent scope 
         let newScope = {...scope}
+
+        // The purpose of having '__record' is to track variables and prevent redeclaration in the same scope
+        newScope['__record'] = {}
+
         this.scopes.push(newScope)
 
         this.trackedNodes.push({})
@@ -235,6 +243,10 @@ class Interpreter {
         this.scopeStates.push(true)
         // This scope contains parent scope 
         let newScope = {...scope}
+
+        // The purpose of having '__record' is to track variables and prevent redeclaration in the same scope
+        newScope['__record'] = {}
+
         this.scopes.push(newScope)
 
         this.trackedNodes.push({})

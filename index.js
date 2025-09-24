@@ -4,23 +4,8 @@ const Interpreter = require('./interpreter')
 
 const code = `
 var num = 5
-
-if (1 < 2){
-  var num = 10
-  log("num is 10", num)
-
-  if (5 < 9){
-    num = 25
-    log("num is 25", num)
-
-    if (10 < 20){
-      num = 40
-      log("num is 40", num)
-    }
-  }
-}
-
-log("num is 5", num)
+var name = "ben"
+var total = 22 + 3 - 2 + 6 - 4
 `
 
 const tokens = new Tokenizer(code).tokenize();

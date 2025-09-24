@@ -252,8 +252,12 @@ class Parser {
             return left;
         }
 
-        // Check for allowed operators [+ - * / == < >]
-        while (["PLUS", "MINUS", "MULTIPLY", "DIVIDE", "GREATER_THAN", "LESS_THAN", "DOUBLE_EQUAL"].includes(this.currentToken().type)) {
+        while (true) {
+            let cToken = this.currentToken()
+            if (cToken === undefined) break
+            let isOperator = ["PLUS", "MINUS", "MULTIPLY", "DIVIDE", "GREATER_THAN", "LESS_THAN", "DOUBLE_EQUAL"].includes(cToken.type)
+            if (isOperator === false) break
+
             let operator = this.currentToken()
             this.nextToken()
 
