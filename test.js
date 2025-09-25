@@ -195,16 +195,129 @@ fn verify(){
 verify()
 `
 
-let testCases = [t1, t2, t3, t4, t5, t6, t7, t8, t9]
+let t10 = `
+fn calc(){
+  for (var i = 0; i < 3; i = i + 1){
+    var digit = 12345
+  }
+}
+calc()
+`
+
+// This must throw error because i is already declared in for loop or i is already declared in the same scope
+let t11 = `
+fn calc(){
+  for (var i = 0; i < 3; i = i + 1){
+    var i = 55
+
+    var digit = 12345
+  }
+}
+calc()
+`
+
+let t12 = `
+fn calc(){
+  for (var i = 0; i < 3; i = i + 1){
+
+    var digit = 12
+    log("digit is 12", digit)
+
+    for (var j = 0; j < 3; j = j + 1){
+      var digit = 13
+      log("digit is 13", digit)
+
+      if (1 < 2){
+        var digit = 14
+        log("digit is 14", digit)
+      }
+
+      for (var k = 0; k < 3; k = k + 1){        
+        var digit = 15
+        log("digit is 15", digit)
+      }
+    }
+  }
+}
+calc()
+`
+
+// This must throw error because k is already declared in for loop or k is already declared in the same scope
+let t13 = `
+fn calc(){
+  for (var i = 0; i < 3; i = i + 1){
+
+    var digit = 12
+    log("digit is 12", digit)
+
+    for (var j = 0; j < 3; j = j + 1){
+      var digit = 13
+      log("digit is 13", digit)
+
+      if (1 < 2){
+        var digit = 14
+        log("digit is 14", digit)
+      }
+
+      for (var k = 0; k < 3; k = k + 1){
+        var k = 5
+
+        var digit = 15
+        log("digit is 15", digit)
+      }
+    }
+  }
+}
+calc()
+`
+
+let t14 = `
+fn calc(num1, num2){
+  for (var i = 0; i < 3; i = i + 1){
+    if (1 < 2){
+      var digit = 5 + num1 + num2
+      log("digit is 8", digit)
+    }
+  }
+}
+calc(1, 2)
+`
+// This must throw error because num1 is already declared in the same scope
+let t15 = `
+fn calc(num1, num2){
+  var num1 = 500
+
+  for (var i = 0; i < 3; i = i + 1){
+    if (1 < 2){
+      var digit = 5 + num1 + num2
+      log("digit is 8", digit)
+    }
+  }
+}
+calc(10, 10)
+`
+
+let testCases = [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15]
 
 const Tokenizer = require('./tokenizer')
 const Parser = require('./parser')
 const Interpreter = require('./interpreter')
 
 for (let i=0; i<testCases.length; i++){
-  const tokens = new Tokenizer(testCases[i]).tokenize();
-  const tree = new Parser(tokens).parse();
-  const output = new Interpreter(tree).run();
-}
 
+  console.log(`==================== Test Case ${i + 1} ====================`)
+
+  try {
+    const tokens = new Tokenizer(testCases[i]).tokenize();
+    const tree = new Parser(tokens).parse();
+    const output = new Interpreter(tree).run();
+  } catch (error) {
+    console.error("error", error.message);
+  }
+
+  console.log(`==================== Test Case ${i + 1} ====================`)
+  console.log("")
+  console.log("")
+  console.log("")
+}
 

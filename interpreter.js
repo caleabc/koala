@@ -8,6 +8,9 @@ class Interpreter {
         this.isNewScopeInserted = true
         this.currentBlockTypes = []
         this.trackedNodes = [] // purpose of this is for updating variables in the correct scope to be specific in the earliest scope where the variable is declared from the time it encountered update operation basically going backwards direction
+    
+        // Temporarily adding it here
+        this.forLoopInit = null
     }
 
     run() {
@@ -100,6 +103,13 @@ class Interpreter {
         // The purpose of having '__record' is to track variables and prevent redeclaration in the same scope
         // redeclare '__record' to make sure it is always empty object everytime a new block is encountered
         newScope['__record'] = {}
+
+        // ...
+        let currentBlockType = this.currentBlockTypes[this.currentBlockTypes.length - 1]
+        if (currentBlockType === "for"){
+            let init = newScope["__init"]
+            newScope['__record'] = {[init]: true}
+        }
         
         this.isNewScopeInserted = false
         
@@ -116,7 +126,6 @@ class Interpreter {
             }
         }
 
-        let currentBlockType = this.currentBlockTypes[this.currentBlockTypes.length - 1]
         if (currentBlockType === "for"){
             return null
         }
@@ -147,8 +156,6 @@ class Interpreter {
         }
     }
 
-    // Maybe there is a duplication of passing newscope...
-
     executeFunction(node, scope) {
         this.currentBlockTypes.push("function")
         this.isNewScopeInserted = true
@@ -159,6 +166,9 @@ class Interpreter {
 
         // The purpose of having '__record' is to track variables and prevent redeclaration in the same scope
         newScope['__record'] = {}
+
+        // '__params' is a reserved keyword to track function parameters and prevent redeclaration in the same scope
+        newScope['__params'] = {}
 
         this.scopes.push(newScope)
 
@@ -174,6 +184,7 @@ class Interpreter {
 
         // Map function parameters to their arguments
         currentFunction.params.forEach((param, index) => {
+            newScope['__params'][param] = true
 
             if (node.arguments[index] === undefined){
                 newScope[param] = undefined
@@ -189,6 +200,10 @@ class Interpreter {
     evaluateVariableDeclaration(node, scope){
 
         if (scope['__record'][node.name] === true){
+            throw new Error(`'${node.name}' has already been declared`);
+        }
+
+        if (scope["__params"][node.name] === true){
             throw new Error(`'${node.name}' has already been declared`);
         }
 
@@ -237,6 +252,9 @@ class Interpreter {
 
     evaluateForStatement(node, scope){
 
+        // Temp adding this code
+        this.forLoopInit = node.init.name
+
         this.isNewScopeInserted = true
         this.currentBlockTypes.push("for")
 
@@ -253,6 +271,9 @@ class Interpreter {
 
         // This is for 'init'
         this.evaluate(node.init, newScope)
+
+        // '__init' is a reserve keyword to track the 'init' variable of the for loop
+        newScope["__init"] = node.init.name
 
         while (this.evaluate(node.condition, newScope)){
 
@@ -272,6 +293,9 @@ class Interpreter {
         this.scopeStates.pop()
 
         this.trackedNodes.pop()
+
+        // Temp adding this code
+        this.forLoopInit = null
         
         // Since we declared 'init' to scope we must remove it after the for loop ends because by design var is block-scoped
         // delete scope[node.init.name]

@@ -3,19 +3,34 @@ const Parser = require('./parser')
 const Interpreter = require('./interpreter')
 
 const code = `
-var num = 5
-var name = "ben"
-var total = 22 + 3 - 2 + 6 - 4
+fn calc(){
+  for (var i = 0; i < 3; i = i + 1){
+
+    var digit = 12345
+  }
+}
+calc()
 `
 
 const tokens = new Tokenizer(code).tokenize();
 const tree = new Parser(tokens).parse();
 
-console.log("tree ikmn", JSON.stringify(tree, null, 2));
+// console.log("tree ikmn", JSON.stringify(tree, null, 2));
 
 const output = new Interpreter(tree).run();
 
 /*
+fn calc(){
+  for (var i = 0; i < 3; i = i + 1){
+    var i = 55 // This must throw error because i is already declared in for loop or i is already declared in the same scope
+
+    var digit = 12345
+  }
+}
+calc()
+
+
+
 var numnum = 30
 
 fn calc5(){
