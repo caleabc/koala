@@ -16,6 +16,8 @@ if (2 < 5){
 
   var num = 5
   log("num is 5", num)
+
+  log("aaa", "abcdasd", "12345", 123333333333, 2 == 2)
 }
 `
 

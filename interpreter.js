@@ -110,7 +110,7 @@ class Interpreter {
                 this.output = output
 
                 // Do not forget to "return" else the below code will continue running
-                return
+                return output
             }
         }
 
@@ -136,6 +136,7 @@ class Interpreter {
             case "DIVIDE": return left / right;
             case "GREATER_THAN": return left > right;
             case "LESS_THAN": return left < right;
+            case "DOUBLE_EQUAL": return left === right;
             default:
                 throw new Error(`Unknown operator: ${node.operator}`);
         }
