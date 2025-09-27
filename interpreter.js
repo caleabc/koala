@@ -11,6 +11,8 @@ class Interpreter {
 
         // The purpose of this is for updating variables in the correct scope to be specific in the earliest scope where the variable is declared, basically going backwards direction
         this.trackedNodes = []
+
+        this.output = null
     }
 
     run() {
@@ -44,11 +46,10 @@ class Interpreter {
                 return this.executeFunction(node, scope);
 
             case "BlockStatement":
-                return this.evaluateBlock(node.body, { ...scope });
+                return this.evaluateBlock(node.body, scope);
 
             case "VariableDeclaration":
-                this.evaluateVariableDeclaration(node, scope)
-                return null;
+                return this.evaluateVariableDeclaration(node, scope)
 
             case "UpdateVariable":
                 return this.evaluateUpdateVariable(node, scope)
@@ -57,12 +58,10 @@ class Interpreter {
                 return this.evaluateBinaryExpression(node, scope);
 
             case "ForStatement":
-                this.evaluateForStatement(node, scope);
-                return null;
+                return this.evaluateForStatement(node, scope);
 
             case "IfStatement":
-                this.evaluateIfStatement(node, scope);
-                return null;
+                return this.evaluateIfStatement(node, scope);
 
             case "ReturnStatement":
                 return this.evaluate(node.value, scope);
@@ -87,7 +86,7 @@ class Interpreter {
 
     /*
     
-    Block means {...}, eg. Program, function block, if block, for looop block
+    Block means {...}, eg. Program, function block (from function call), if block, for looop block
 
     */
     evaluateBlock(statements, scope) {
@@ -101,14 +100,17 @@ class Interpreter {
         }
         
         for (let stmt of statements) {
-            let result = this.evaluate(stmt, scope);
+            let output = this.evaluate(stmt, scope);
 
             if (stmt.type === "ReturnStatement"){
+                this.currentBlockTypes.pop()
                 this.scopes.pop()
-
                 this.trackedNodes.pop()
 
-                return result
+                this.output = output
+
+                // Do not forget to "return" else the below code will continue running
+                return
             }
         }
 
@@ -120,7 +122,7 @@ class Interpreter {
         this.scopes.pop()
         this.trackedNodes.pop()
 
-        return null;
+        return this.output;
     }
 
     evaluateBinaryExpression(node, scope) {
@@ -156,26 +158,18 @@ class Interpreter {
         let currentFunction = newScope[node.name];
         if (currentFunction === undefined) throw new Error(`Function not found: ${node.name}`);
 
-        // The reason why pushing directly to scopes 'push(scope)' and not 'push({...scope})' is because we need to update the real scope at that given time, this is a mutation since it has a same ref id
-        // Why is it here? i mean below newScope? The reason for that is...
-        // this.scopes.push(newScope)
+        if (currentFunction.params.length !== node.arguments.length){
+            throw new Error("Parameters and arguments don't have the same length")
+        }
 
-        // params length and arguments length must be equal or else throw error
-        // TODO: add conditional here to verify their lengths
-
-        // TODO: convert below code to for loop for easier to read
+        let params = currentFunction.params
 
         // Map function parameters to their arguments
-        currentFunction.params.forEach((param, index) => {
 
-            if (node.arguments[index] === undefined){
-                newScope[param] = undefined
-            } else {
-                newScope[param] = this.evaluate(node.arguments[index], newScope);
-                newScope['__record'][param] = true
-            }
-
-        });
+        for (let i = 0; i < params.length; i++){
+            newScope[params[i]] = this.evaluate(node.arguments[i], newScope);
+            newScope['__record'][params[i]] = true
+        }
 
         return this.evaluateBlock(currentFunction.body, newScope);
     }

@@ -259,11 +259,79 @@ fn calc(num1, num2){
 calc(1, 2)
 `
 
+let t13 = `
+var num = 5
+
+fn calc(){
+
+  var num = 8
+  log("num is 8", num)
+
+  if (1 < 2){
+    var num = 10
+    log("num is 10", num)
+
+    if (1 < 5){
+      var num = 32
+      log("num is 32", num)
+
+      if (1 < 7){
+        var num = 44
+        log("num is 44", num)
+
+        return 9090
+      }
+    }
+  }
+}
+
+var r = calc()
+
+log("r is 9090", r)
+
+fn calc1(){
+
+  var num = 8
+  log("num is 8", num)
+
+  if (1 < 2){
+    var num = 10
+    log("num is 10", num)
+
+    if (1 < 5){
+      var num = 32
+      log("num is 32", num)
+
+      if (1 < 7){
+        var num = 44
+        log("num is 44", num)
+
+        if (2 < 5){
+          var a = 2
+
+          if (2 < 3){
+            return a + 32
+
+            if (1 < 55){
+              log("--- end ---")
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+var aa = calc1()
+
+log("aa is 34", aa)
+`
+
 const Tokenizer = require('./tokenizer')
 const Parser = require('./parser')
 const Interpreter = require('./interpreter')
 
-let testCases = [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12]
+let testCases = [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13]
 
 for (let i=0; i<testCases.length; i++){
 
