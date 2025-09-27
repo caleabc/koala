@@ -12,12 +12,8 @@ var total = 22 + 3 - 2 + 6 - 4
 
 let t2 = `
 if (2 < 5){
-  log("2 is less than 5")
-
   var num = 5
-  log("num is 5", num)
-
-  log("aaa", "abcdasd", "12345", 123333333333, 2 == 2)
+  log(5 == num)
 }
 `
 
@@ -27,7 +23,7 @@ fn calc(){
 }
 
 var currentTotal = 5 + calc()
-log("currentTotal is 405", currentTotal)
+log(405 == currentTotal)
 
 fn calc(num1, num2){
   var fee = num1 + num2
@@ -35,7 +31,7 @@ fn calc(num1, num2){
 }
 
 var total = 5 + calc(10, 1)
-log("total is 416", total)
+log(416 == total)
 `
 
 // Adding two for loop in the same function that both uses "i" as init
@@ -44,13 +40,13 @@ fn calc(){
   for (var i = 0; i < 10; i = i + 1){
     if (1 < 2){
       var digit = 12345
-      log("digit is 12345", digit)
+      log(12345 == digit)
     }
   }
 
   for (var i = 0; i < 10; i = i + 1){
     var digit = 12345
-    log("digit is 12345", digit)
+    log(12345 == digit)
   }
 }
 calc()
@@ -60,48 +56,48 @@ let t5 = `
 var num = 5
 
 fn calc(){
-  log("num is 5", num)
+  log(5 == num)
 
   var num = 8
-  log("num is 8", num)
+  log(8 == num)
 
   if (1 < 2){
     var num = 10
-    log("num is 10", num)
+    log(10 == num)
   }
 
-  log("num is 8", num)
+  log(8 == num)
 
   num = 20
-  log("num is 20", num)
+  log(20 == num)
 }
 calc()
 
-log("num is 5", num)
+log(5 == num)
 `
 
 let t6 = `
 var num = 5
-log("num is 5", num)
+log(5 == num)
 
 fn calc(){
-    var num = 8
-    log("num is 8", num)
+  var num = 8
+  log(8 == num)
 }
 calc()
 `
 
 let t7 = `
 var num = 5
-log("num is 5", num)
+log(5 == num)
 
 fn calc(){
     var num = 8
-    log("num is 8", num)
+    log(8 == num)
 
     for (var i = 0; i < 5; i = i + 1){
         var digit = 50
-        log("digit is 50", digit)
+        log(50 == digit)
     }
 }
 calc()
@@ -109,26 +105,26 @@ calc()
 
 let t8 = `
 var num = 5
-log("num is 5", num)
+log(5 == num)
 
 fn calc(){
     var num = 8
-    log("num is 8", num)
+    log(8 == num)
 
     for (var i = 0; i < 5; i = i + 1){
         if (1 < 2){
             var digit = 10
-            log("digit is 10", digit)
+            log(10 == digit)
 
             if (5 < 9){
                 var digit = 20
-                log("digit is 20", digit)
+                log(20 == digit)
             }
         }
 
         for (var j = 0; j < 3; j = j + 1){
             var digit = 100
-            log("digit is 100", digit)
+            log(100 == digit)
         }
     }
 
@@ -137,17 +133,17 @@ fn calc(){
     for (var i = 0; i < 5; i = i + 1){
         if (1 < 2){
             var digit = 10
-            log("digit is 10", digit)
+            log(10 == digit)
 
             if (5 < 9){
                 var digit = 20
-                log("digit is 20", digit)
+                log(20 == digit)
             }
         }
 
         for (var j = 0; j < 3; j = j + 1){
             var digit = 100
-            log("digit is 100", digit)
+            log(100 == digit)
         }
     }
 }
@@ -163,44 +159,44 @@ fn calculate(){
   var num = 5
 
   fn calc1(){
-    log("num is 5", num)
+    log(5 == num)
 
     num = 100
-    log("num is 100", num)
+    log(100 == num)
 
     fn calc11(){
       num = 155555
-      log("num is 155555", num)
+      log(155555 == num)
 
       for (var i = 0; i < 10; i = i + 1){
         if (1 < 2){
           var digit = 12345
-          log("digit is 12345", digit)
+          log(12345 == digit)
 
           var num = 88
-          log("num is 88", num)
+          log(88 == num)
         }
       }
 
-      log("num is 155555", num)
+      log(155555 == num)
 
       if (1 < 2){
         if (5 < 9){
           var digit = 5 + calc5()
-          log("digit is 405", digit)
+          log(405 == digit)
         }
       }
 
       if (1 < 2){
         var digit = 50
-        log("digit is 50", digit)
+        log(50 == digit)
       }
     }
     calc11()
   }
   calc1()
 
-  log("num is 155555", num)
+  log(155555 == num)
 
   return 5
 }
@@ -208,7 +204,7 @@ calculate()
 
 fn verify(){
   var num = 8080
-  log("num is 8080", num)
+  log(8080 == num)
   return 5 + num
 }
 verify()
@@ -218,6 +214,7 @@ let t10 = `
 fn calc(){
   for (var i = 0; i < 3; i = i + 1){
     var digit = 12345
+    log(12345 == digit)
   }
 }
 calc()
@@ -228,20 +225,20 @@ fn calc(){
   for (var i = 0; i < 3; i = i + 1){
 
     var digit = 12
-    log("digit is 12", digit)
+    log(12 == digit)
 
     for (var j = 0; j < 3; j = j + 1){
       var digit = 13
-      log("digit is 13", digit)
+      log(13 == digit)
 
       if (1 < 2){
         var digit = 14
-        log("digit is 14", digit)
+        log(14 == digit)
       }
 
       for (var k = 0; k < 3; k = k + 1){        
         var digit = 15
-        log("digit is 15", digit)
+        log(15 == digit)
       }
     }
   }
@@ -254,7 +251,7 @@ fn calc(num1, num2){
   for (var i = 0; i < 3; i = i + 1){
     if (1 < 2){
       var digit = 5 + num1 + num2
-      log("digit is 8", digit)
+      log(8 == digit)
     }
   }
 }
@@ -267,19 +264,19 @@ var num = 5
 fn calc(){
 
   var num = 8
-  log("num is 8", num)
+  log(8 == num)
 
   if (1 < 2){
     var num = 10
-    log("num is 10", num)
+    log(10 == num)
 
     if (1 < 5){
       var num = 32
-      log("num is 32", num)
+      log(32 == num)
 
       if (1 < 7){
         var num = 44
-        log("num is 44", num)
+        log(44 == num)
 
         return 9090
       }
@@ -289,24 +286,24 @@ fn calc(){
 
 var r = calc()
 
-log("r is 9090", r)
+log(9090 == r)
 
 fn calc1(){
 
   var num = 8
-  log("num is 8", num)
+  log(8 == num)
 
   if (1 < 2){
     var num = 10
-    log("num is 10", num)
+    log(10 == num)
 
     if (1 < 5){
       var num = 32
-      log("num is 32", num)
+      log(32 == num)
 
       if (1 < 7){
         var num = 44
-        log("num is 44", num)
+        log(44 == num)
 
         if (2 < 5){
           var a = 2
@@ -326,7 +323,7 @@ fn calc1(){
 
 var aa = calc1()
 
-log("aa is 34", aa)
+log(34 == aa)
 `
 
 const Tokenizer = require('./tokenizer')
@@ -411,6 +408,10 @@ fn calc(){
 }
 calc()
 `
+
+console.log("----------------------------------------------------")
+console.log("This section of testing is for code that throw error")
+console.log("----------------------------------------------------")
 
 testCases = [t100, t101, t102]
 
