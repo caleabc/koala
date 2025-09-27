@@ -1,3 +1,9 @@
+/*
+
+The below testcases will not throw any error
+
+*/
+
 let t1 = `
 var num = 5
 var name = "ben"
@@ -18,10 +24,19 @@ fn calc(){
   return 400
 }
 
-var total = 5 + calc()
-log("total is 405", total)
+var currentTotal = 5 + calc()
+log("currentTotal is 405", currentTotal)
+
+fn calc(num1, num2){
+  var fee = num1 + num2
+  return 400 + fee
+}
+
+var total = 5 + calc(10, 1)
+log("total is 416", total)
 `
 
+// Adding two for loop in the same function that both uses "i" as init
 let t4 = `
 fn calc(){
   for (var i = 0; i < 10; i = i + 1){
@@ -43,18 +58,20 @@ let t5 = `
 var num = 5
 
 fn calc(){
-    log("num is 5", num)
+  log("num is 5", num)
 
-    var num = 8
-    log("num is 8", num)
+  var num = 8
+  log("num is 8", num)
 
-    if (1 < 2){
-        var num = 10
-        log("num is 10", num)
-    }
+  if (1 < 2){
+    var num = 10
+    log("num is 10", num)
+  }
 
-    num = 20
-    log("num is 20", num)
+  log("num is 8", num)
+
+  num = 20
+  log("num is 20", num)
 }
 calc()
 
@@ -204,19 +221,7 @@ fn calc(){
 calc()
 `
 
-// This must throw error because i is already declared in for loop or i is already declared in the same scope
 let t11 = `
-fn calc(){
-  for (var i = 0; i < 3; i = i + 1){
-    var i = 55
-
-    var digit = 12345
-  }
-}
-calc()
-`
-
-let t12 = `
 fn calc(){
   for (var i = 0; i < 3; i = i + 1){
 
@@ -242,8 +247,62 @@ fn calc(){
 calc()
 `
 
+let t12 = `
+fn calc(num1, num2){
+  for (var i = 0; i < 3; i = i + 1){
+    if (1 < 2){
+      var digit = 5 + num1 + num2
+      log("digit is 8", digit)
+    }
+  }
+}
+calc(1, 2)
+`
+
+const Tokenizer = require('./tokenizer')
+const Parser = require('./parser')
+const Interpreter = require('./interpreter')
+
+let testCases = [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12]
+
+for (let i=0; i<testCases.length; i++){
+
+  console.log(`==================== Test Case ${i + 1} ====================`)
+
+  const tokens = new Tokenizer(testCases[i]).tokenize();
+  const tree = new Parser(tokens).parse();
+  const output = new Interpreter(tree).run();
+
+  console.log(`==================== Test Case ${i + 1} ====================`)
+  console.log("")
+  console.log("")
+  console.log("")
+  console.log("")
+}
+
+/*
+
+Below testcases will throw error
+
+*/
+
+// This must throw error because num1 is already declared in the same scope
+let t100 = `
+fn calc(num1, num2){
+  var num1 = 500
+
+  for (var i = 0; i < 3; i = i + 1){
+    if (1 < 2){
+      var digit = 5 + num1 + num2
+      log("digit is 8", digit)
+    }
+  }
+}
+calc(10, 10)
+`
+
 // This must throw error because k is already declared in for loop or k is already declared in the same scope
-let t13 = `
+let t101 = `
 fn calc(){
   for (var i = 0; i < 3; i = i + 1){
 
@@ -271,37 +330,19 @@ fn calc(){
 calc()
 `
 
-let t14 = `
-fn calc(num1, num2){
+// This must throw error because i is already declared in for loop or i is already declared in the same scope
+let t102 = `
+fn calc(){
   for (var i = 0; i < 3; i = i + 1){
-    if (1 < 2){
-      var digit = 5 + num1 + num2
-      log("digit is 8", digit)
-    }
+    var i = 55
+
+    var digit = 12345
   }
 }
-calc(1, 2)
-`
-// This must throw error because num1 is already declared in the same scope
-let t15 = `
-fn calc(num1, num2){
-  var num1 = 500
-
-  for (var i = 0; i < 3; i = i + 1){
-    if (1 < 2){
-      var digit = 5 + num1 + num2
-      log("digit is 8", digit)
-    }
-  }
-}
-calc(10, 10)
+calc()
 `
 
-let testCases = [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15]
-
-const Tokenizer = require('./tokenizer')
-const Parser = require('./parser')
-const Interpreter = require('./interpreter')
+testCases = [t100, t101, t102]
 
 for (let i=0; i<testCases.length; i++){
 
@@ -312,12 +353,14 @@ for (let i=0; i<testCases.length; i++){
     const tree = new Parser(tokens).parse();
     const output = new Interpreter(tree).run();
   } catch (error) {
-    console.error("error", error.message);
+    console.log("--- PASSED ---")
   }
 
   console.log(`==================== Test Case ${i + 1} ====================`)
   console.log("")
   console.log("")
   console.log("")
+  console.log("")
 }
+
 

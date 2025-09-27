@@ -3,13 +3,27 @@ const Parser = require('./parser')
 const Interpreter = require('./interpreter')
 
 const code = `
-fn calc(){
-  for (var i = 0; i < 3; i = i + 1){
+var num = 5
 
-    var digit = 12345
+fn calc(){
+  log("num is 5", num)
+
+  var num = 8
+  log("num is 8", num)
+
+  if (1 < 2){
+    var num = 10
+    log("num is 10", num)
   }
+
+  log("num is 8", num)
+
+  num = 20
+  log("num is 20", num)
 }
 calc()
+
+log("num is 5", num)
 `
 
 const tokens = new Tokenizer(code).tokenize();

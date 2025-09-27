@@ -2,15 +2,15 @@ class Interpreter {
 
     constructor(tree){
         this.tree = tree
+
+        // The purpose of "scopes" is to have a tracking of scope, and this is used for update operation
         this.scopes = []
 
-        this.scopeStates = [false]
-        this.isNewScopeInserted = true
+        // The purpose of this is to determine what is current block type, in evaluateBlock if current block type is "for" then empty the __record property then add the init name to the object, basically this is helpful in for loop
         this.currentBlockTypes = []
-        this.trackedNodes = [] // purpose of this is for updating variables in the correct scope to be specific in the earliest scope where the variable is declared from the time it encountered update operation basically going backwards direction
-    
-        // Temporarily adding it here
-        this.forLoopInit = null
+
+        // The purpose of this is for updating variables in the correct scope to be specific in the earliest scope where the variable is declared, basically going backwards direction
+        this.trackedNodes = []
     }
 
     run() {
@@ -23,9 +23,12 @@ class Interpreter {
         switch (node.type) {
             case "Program":
                 this.currentBlockType = "program"
-                this.isNewScopeInserted = true
-                this.scopes.push(scope)
 
+                // "__record" is a reserved keyword
+                // The purpose of having '__record' is to track variables and prevent redeclaration in the same scope
+                scope['__record'] = {}
+                
+                this.scopes.push(scope)
                 this.trackedNodes.push({})
                 
                 return this.evaluateBlock(node.body, scope);
@@ -82,43 +85,26 @@ class Interpreter {
         }
     }
 
+    /*
+    
+    Block means {...}, eg. Program, function block, if block, for looop block
+
+    */
     evaluateBlock(statements, scope) {
 
-        let newScope = scope
-
-        if (this.isNewScopeInserted === false){
-            this.scopeStates.push(true)
-
-            // This scope contains parent scope 
-            newScope = {...scope}
-
-            // The purpose of having '__record' is to track variables and prevent redeclaration in the same scope
-            newScope['__record'] = {}
-
-            this.scopes.push(newScope)
-
-            this.trackedNodes.push({})
-        }
-
-        // The purpose of having '__record' is to track variables and prevent redeclaration in the same scope
-        // redeclare '__record' to make sure it is always empty object everytime a new block is encountered
-        newScope['__record'] = {}
-
-        // ...
         let currentBlockType = this.currentBlockTypes[this.currentBlockTypes.length - 1]
         if (currentBlockType === "for"){
-            let init = newScope["__init"]
-            newScope['__record'] = {[init]: true}
+            scope['__record'] = {}
+
+            let init = scope["__init"]
+            scope['__record'] = {[init]: true}
         }
         
-        this.isNewScopeInserted = false
-        
         for (let stmt of statements) {
-            let result = this.evaluate(stmt, newScope);
+            let result = this.evaluate(stmt, scope);
 
             if (stmt.type === "ReturnStatement"){
                 this.scopes.pop()
-                this.scopeStates.pop()
 
                 this.trackedNodes.pop()
 
@@ -131,10 +117,7 @@ class Interpreter {
         }
 
         this.currentBlockTypes.pop()
-
         this.scopes.pop()
-        this.scopeStates.pop()
-
         this.trackedNodes.pop()
 
         return null;
@@ -158,17 +141,13 @@ class Interpreter {
 
     executeFunction(node, scope) {
         this.currentBlockTypes.push("function")
-        this.isNewScopeInserted = true
 
-        this.scopeStates.push(true)
         // This scope contains parent scope 
         let newScope = {...scope}
 
+        // "__record" is a reserved keyword
         // The purpose of having '__record' is to track variables and prevent redeclaration in the same scope
         newScope['__record'] = {}
-
-        // '__params' is a reserved keyword to track function parameters and prevent redeclaration in the same scope
-        newScope['__params'] = {}
 
         this.scopes.push(newScope)
 
@@ -177,19 +156,23 @@ class Interpreter {
         let currentFunction = newScope[node.name];
         if (currentFunction === undefined) throw new Error(`Function not found: ${node.name}`);
 
-    
         // The reason why pushing directly to scopes 'push(scope)' and not 'push({...scope})' is because we need to update the real scope at that given time, this is a mutation since it has a same ref id
         // Why is it here? i mean below newScope? The reason for that is...
         // this.scopes.push(newScope)
 
+        // params length and arguments length must be equal or else throw error
+        // TODO: add conditional here to verify their lengths
+
+        // TODO: convert below code to for loop for easier to read
+
         // Map function parameters to their arguments
         currentFunction.params.forEach((param, index) => {
-            newScope['__params'][param] = true
 
             if (node.arguments[index] === undefined){
                 newScope[param] = undefined
             } else {
                 newScope[param] = this.evaluate(node.arguments[index], newScope);
+                newScope['__record'][param] = true
             }
 
         });
@@ -203,21 +186,11 @@ class Interpreter {
             throw new Error(`'${node.name}' has already been declared`);
         }
 
-        if (scope["__params"][node.name] === true){
-            throw new Error(`'${node.name}' has already been declared`);
-        }
+        scope[node.name] = this.evaluate(node.value, scope);
+        scope['__record'][node.name] = true
 
-        let lastState = this.scopeStates[this.scopeStates.length - 1]
-
-        if (scope[node.name] === undefined || lastState === true){
-            scope[node.name] = this.evaluate(node.value, scope);
-            scope['__record'][node.name] = true
-
-            let lastNode = this.trackedNodes[this.trackedNodes.length - 1]
-            lastNode[node.name] = node
-        } else {
-            throw new Error(`'${node.name}' has already been declared`);
-        }
+        let lastTnode = this.trackedNodes[this.trackedNodes.length - 1]
+        lastTnode[node.name] = node
 
     }
 
@@ -228,8 +201,6 @@ class Interpreter {
         }
 
         let val = this.evaluate(node.value, scope);
-
-        // scope[node.name] = val
 
         let scopes = this.scopes
         for (let i = scopes.length-1; i>=0; i--){
@@ -252,13 +223,8 @@ class Interpreter {
 
     evaluateForStatement(node, scope){
 
-        // Temp adding this code
-        this.forLoopInit = node.init.name
-
-        this.isNewScopeInserted = true
         this.currentBlockTypes.push("for")
 
-        this.scopeStates.push(true)
         // This scope contains parent scope 
         let newScope = {...scope}
 
@@ -272,40 +238,40 @@ class Interpreter {
         // This is for 'init'
         this.evaluate(node.init, newScope)
 
-        // '__init' is a reserve keyword to track the 'init' variable of the for loop
+        // '__init' is a reserve keyword, to track the 'init' variable of the for loop
+        // why just add this __init to __record so that no more declaration of __init? the reason for this is loop run more than once the design of this engine is for loop does not issue another scope every iteration it only assign just only once scope no matter the for loop is like i < 100000 it just one scope not n scope
         newScope["__init"] = node.init.name
 
         while (this.evaluate(node.condition, newScope)){
 
             this.evaluateBlock(node.body, newScope)
 
-            this.isNewScopeInserted = true
-
             // This is for 'increment', the 'increment' is treated as 'updateVariable', means update the 'init'
             this.evaluate(node.increment, newScope)
         }
 
-        this.isNewScopeInserted = false
-
         this.currentBlockTypes.pop()
         
         this.scopes.pop()
-        this.scopeStates.pop()
 
         this.trackedNodes.pop()
-
-        // Temp adding this code
-        this.forLoopInit = null
-        
-        // Since we declared 'init' to scope we must remove it after the for loop ends because by design var is block-scoped
-        // delete scope[node.init.name]
-
     }
 
     evaluateIfStatement(node, scope){
         if (this.evaluate(node.condition, scope)) {
             this.currentBlockTypes.push("if")
-            return this.evaluateBlock(node.body, scope);
+
+            // This scope contains parent scope 
+            let newScope = {...scope}
+
+            // The purpose of having '__record' is to track variables and prevent redeclaration in the same scope
+            newScope['__record'] = {}
+
+            this.scopes.push(newScope)
+
+            this.trackedNodes.push({})
+
+            return this.evaluateBlock(node.body, newScope);
         }
 
         return null;
